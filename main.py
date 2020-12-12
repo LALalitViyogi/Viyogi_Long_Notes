@@ -73,7 +73,7 @@ color_dict = {
 speak_icon=tk.PhotoImage(file="icons2/speak.png")
 speaked = tk.Menu(main_menu,tearoff=False)
 
-
+ 
 ############# cascading all menus##########
 main_menu.add_cascade(label='File', menu=files)
 main_menu.add_cascade(label='Edit', menu=edit)
@@ -158,6 +158,40 @@ scroll_bar.pack(fill=tk.Y, side=tk.RIGHT)
 text_editor.pack(fill=tk.BOTH,expand=True)
 scroll_bar.config(command=text_editor.yview)
 text_editor.config(yscrollcommand=scroll_bar.set)
+
+
+### font functionality ###
+curr_font_family='Arial'
+curr_font_size=12
+
+def change_font_family(main_application):
+    global curr_font_family
+    curr_font_family = font_family.get()
+    text_editor.configure(font=(curr_font_family,curr_font_size,))
+
+
+
+def change_font_size(main_application):
+    global curr_font_size
+    curr_font_size=size_var.get()
+    text_editor.configure(font=(curr_font_family,curr_font_size))
+
+font_box.bind("<<ComboboxSelected>>", change_font_family)
+font_size.bind("<<ComboboxSelected>>", change_font_size)
+
+#### buttons functionality
+
+## bold button 
+def change_to_bold():
+    text_property=tk.font.Font(font=text_editor['font'])
+    if text_property.actual()['weight']=='normal':
+        text_editor.configure(font=(curr_font_family,curr_font_size,'bold'))
+    if text_property.actual()['weight']=='bold':
+        text_editor.configure(font=(curr_font_family,curr_font_size,'normal'))
+bold_btn.configure(command=change_to_bold)
+
+text_editor.configure(font=('Arial',12))
+
 #---------------------------&&&&&&&&&&&&---------- end text edit space -----------&&&&&&&&&&&&--------------#
 
 ############################################### status bar #####################################
