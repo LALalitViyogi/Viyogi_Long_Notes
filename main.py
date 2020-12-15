@@ -10,9 +10,6 @@ main_application.geometry('800x600')
 main_application.title("Viyogi Long Notes")
 
 
-
-
-
 ################################################# main menu front end ###################################
 
 main_menu= tk.Menu()
@@ -41,12 +38,12 @@ edit = tk.Menu(main_menu,tearoff=False)
 
 
 ###### View menu ########
+
 # //////Using icons///// right now its code is comment out.
 tool_bar_icon=tk.PhotoImage(file="icons2/tool_bar.png")
 status_bar_icon=tk.PhotoImage(file="icons2/status_bar.png")
 
 view = tk.Menu(main_menu,tearoff=False)
-
 
 ###### color menu ########
 light_default_icon = tk.PhotoImage(file='icons2/light_default.png')
@@ -73,7 +70,7 @@ color_dict = {
 speak_icon=tk.PhotoImage(file="icons2/speak.png")
 speaked = tk.Menu(main_menu,tearoff=False)
 
- 
+
 ############# cascading all menus##########
 main_menu.add_cascade(label='File', menu=files)
 main_menu.add_cascade(label='Edit', menu=edit)
@@ -160,9 +157,9 @@ scroll_bar.config(command=text_editor.yview)
 text_editor.config(yscrollcommand=scroll_bar.set)
 
 
-### font functionality ###
+###  basic font functionality ###
 curr_font_family='Arial'
-curr_font_size=12
+curr_font_size=24
 
 def change_font_family(main_application):
     global curr_font_family
@@ -178,6 +175,7 @@ def change_font_size(main_application):
 
 font_box.bind("<<ComboboxSelected>>", change_font_family)
 font_size.bind("<<ComboboxSelected>>", change_font_size)
+## --------------- basic font functionality done -----------------###
 
 #### buttons functionality
 
@@ -190,7 +188,32 @@ def change_to_bold():
         text_editor.configure(font=(curr_font_family,curr_font_size,'normal'))
 bold_btn.configure(command=change_to_bold)
 
-text_editor.configure(font=('Arial',12))
+## italic button
+def change_to_italic():
+    text_property=tk.font.Font(font=text_editor['font'])
+    if text_property.actual()['slant']=='roman':
+        text_editor.configure(font=(curr_font_family,curr_font_size,'italic'))
+    if text_property.actual()['slant']=='italic':
+        text_editor.configure(font=(curr_font_family,curr_font_size,'normal'))
+italic_btn.configure(command=change_to_italic)
+
+## underline button
+def change_to_underline():
+    text_property=tk.font.Font(font=text_editor['font'])
+    if text_property.actual()['underline']== 0:
+        text_editor.configure(font=(curr_font_family,curr_font_size,'underline'))
+    if text_property.actual()['slant']==1:
+        text_editor.configure(font=(curr_font_family,curr_font_size,'normal'))
+underline_btn.configure(command=change_to_underline)
+
+#### font color functionality
+
+def change_font_color():
+    color_var = tk.colorchooser.askcolor()
+    text_editor.configure(fg=color_var[1])
+font_color_btn.configure(command=change_font_color)
+
+text_editor.configure(font=('Arial',24))
 
 #---------------------------&&&&&&&&&&&&---------- end text edit space -----------&&&&&&&&&&&&--------------#
 
