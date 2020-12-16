@@ -6,9 +6,9 @@ import os
 
 
 main_application=tk.Tk()
-main_application.geometry('800x600')
+main_application.geometry('1200x800')
 main_application.title("Viyogi Long Notes")
-
+main_application.wm_iconbitmap('icon.ico')
 
 ################################################# main menu front end ###################################
 
@@ -213,13 +213,55 @@ def change_font_color():
     text_editor.configure(fg=color_var[1])
 font_color_btn.configure(command=change_font_color)
 
+
+### align functionality --------------
+
+#     $$$ ALIGN LEFT
+def change_to_left():
+    text_content = text_editor.get(1.0,'end')
+    text_editor.tag_config('left', justify=tk.LEFT)
+    text_editor.delete(1.0,tk.END)
+    text_editor.insert(tk.INSERT,text_content,'left')
+
+align_left_btn.configure(command=change_to_left)
+
+
+#    $$$ ALIGN CENTER $$$
+def change_to_center():
+    text_content = text_editor.get(1.0,'end')
+    text_editor.tag_config('center', justify=tk.CENTER)
+    text_editor.delete(1.0,tk.END)
+    text_editor.insert(tk.INSERT,text_content,'center')
+align_center_btn.configure(command=change_to_center)
+
+
+#    $$$ ALIGN RIGHT 
+def change_to_right():
+    text_content = text_editor.get(1.0,'end')
+    text_editor.tag_config('right', justify=tk.RIGHT)
+    text_editor.delete(1.0,tk.END)
+    text_editor.insert(tk.INSERT,text_content,'right')
+align_right_btn.configure(command=change_to_right)
+
 text_editor.configure(font=('Arial',24))
 
 #---------------------------&&&&&&&&&&&&---------- end text edit space -----------&&&&&&&&&&&&--------------#
 
 ############################################### status bar #####################################
-status_bar=ttk.Label(main_application, text ='Status Bar')
+status_bar = ttk.Label(main_application, text = 'Status Bar')
 status_bar.pack(side=tk.BOTTOM)
+
+text_changed = False 
+def changed(event=None):
+    global text_changed
+    if text_editor.edit_modified():
+        text_changed = True 
+        words = len(text_editor.get(1.0, 'end-1c').split())
+        characters = len(text_editor.get(1.0, 'end-1c'))
+        status_bar.config(text=f'Characters : {characters} Words : {words}')
+    text_editor.edit_modified(False)
+
+text_editor.bind('<<Modified>>', changed)
 #---------------------------- end status bar --------------------#
 
 ############################ main menu back end ##########################
