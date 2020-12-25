@@ -266,13 +266,101 @@ text_editor.bind('<<Modified>>', changed)
 
 ############################ main menu back end ##########################
 
+#main menu variables
+file_url=""
+
+########----------- New File Functionlity--------#######
+def new_file(event=None):
+    global file_url
+    if file_url is not None:
+        file_url=""
+    text_editor.delete(1.0,tk.END)
+    main_application.title("Untitled file")
+
 
 ## adding commands in file menu.
-files.add_command(label="New",compound=tk.LEFT,image=new_icon, accelerator="CTRL+N")
-files.add_command(label="Open",compound=tk.LEFT, image=open_icon ,accelerator="CTRL+O")
-files.add_command(label="Save",compound=tk.LEFT, image=save_icon ,accelerator="CTRL+S")
-files.add_command(label="Save as",compound=tk.LEFT, image=save_as_icon ,accelerator="CTRL+SHIFT+S")
-files.add_command(label="Exit",compound=tk.LEFT, image=exit_icon ,accelerator="CTRL+Q")
+files.add_command(label="New",compound=tk.LEFT,image=new_icon, accelerator="CTRL+N", command=new_file)
+
+
+###    OPEN FILE FUNCTIONALITY _______________
+def open_file(event=None):
+    global file_url
+    file_url=filedialog.askopenfilename(initialdir=os.getcwd(), title='Open File', filetypes=(('Text File','*.txt'),('Python File','*.py'),('All Files','*.*')))
+    try:
+        with open(file_url,'r') as file_read:
+            text_editor.delete(1.0, tk.END)
+            text_editor.insert(1.0, file_read.read())
+    except FileNotFoundError :
+        return
+    except:
+        return
+    main_application.title(os.path.basename(file_url))
+
+files.add_command(label="Open",compound=tk.LEFT, image=open_icon ,accelerator="CTRL+O", command=open_file)
+
+
+
+### SAVE FILE FUNCTIONALITY _________________________
+
+def save_file(event=None):
+    global file_url
+    try:
+        if file_url :
+            content=str(text_editor.get(1.0,tk.END))
+            with open(file_url,'w',encoding='utf-8') as file_write:
+                file_write.write(content)
+        else:
+            file_url=filedialog.asksaveasfile(mode='w', defaultextension='.txt', filetypes=(('Text File','*.txt'),('Python File','*.py'),('All Files','*.*')))
+            content2=text_editor.get(1.0,tk.END)
+            file_url.write(content2)
+            file_url.close()
+    except:
+        return
+
+files.add_command(label="Save",compound=tk.LEFT, image=save_icon ,accelerator="CTRL+S", command=save_file)
+
+# Save As Functionality---------------------
+def save_as_file(event=None):
+    global file_url
+    try:
+        content=text_editor.get(1.0,tk.END)
+        file_url=filedialog.asksaveasfile(mode='w', defaultextension='.txt', filetypes=(('Text File','*.txt'),('Python File','*.py'),('All Files','*.*')))
+        file_url.write(content)
+        file_url.close()
+    except :
+        return
+files.add_command(label="Save as",compound=tk.LEFT, image=save_as_icon ,accelerator="CTRL+SHIFT+S", command=save_as_file)
+
+### Exit Functionality ---------
+def exit_func(event=None):
+    global file_url,text_changed
+    try:
+        if text_changed:
+            popup = messagebox.askyesnocancel('WARNING','Do you want to save the file ?')
+            if popup is True:
+                if file_url:
+                    content=text_editor.get(1.0,tk.END)
+                    with open(file_url,'w',encoding='utf-8') as file_write:
+                        file_write.write(content)
+                        file_write.close()
+                        main_application.destroy()
+                else:
+                    content2=str(text_editor.get(1.0,tk.END))
+                    file_url=filedialog.asksaveasfile(mode='w', defaultextension='.txt', filetypes=(('Text File','*.txt'),('Python File','*.py'),('All Files','*.*')))
+                    file_url.write(content2)
+                    file_url.close()
+                    main_application.destroy()
+            elif popup is False:
+                main_application.destroy()
+            else:
+                return
+        else:
+            main_application.destroy()
+    except :
+        return
+
+
+files.add_command(label="Exit",compound=tk.LEFT, image=exit_icon ,accelerator="CTRL+Q",command=exit_func)
 
 
 
@@ -305,9 +393,6 @@ def Speaktext(audio):
  engine.runAndWait()
 speaked.add_command(label='Speak',compound=tk.LEFT,command=Speaktext,accelerator='CTRL+T')
 speak_btn.config(command=Speaktext)
-
-
-
 
 
 #---------------------------- end main menu back end --------------------#
