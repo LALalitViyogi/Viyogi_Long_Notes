@@ -1,5 +1,4 @@
 import tkinter as tk
-import pyttsx3
 from tkinter import ttk
 from tkinter import font, colorchooser, filedialog, messagebox
 import os 
@@ -62,17 +61,11 @@ color_dict = {
     'Night Blue' :('#ededed', '#6b9dc2')
 }
 
-############# Speak MEnu ##########
-speak_icon=tk.PhotoImage(file="icons2/speak.png")
-speaked = tk.Menu(main_menu,tearoff=False)
-
-
 ############# cascading all menus##########
 main_menu.add_cascade(label='File', menu=files)
 main_menu.add_cascade(label='Edit', menu=edit)
 main_menu.add_cascade(label='View', menu=view)
 main_menu.add_cascade(label='Color', menu=color_theme)
-main_menu.add_cascade(label='Speak it!', menu=speaked)
 
 
 #----------------------------&&&&&&&------ end main menu front end ------&&&&&----------------------#
@@ -131,11 +124,6 @@ align_center_btn.grid(row=0,column=7,padx=5)
 align_right_icon=tk.PhotoImage(file="icons2/align_right.png")
 align_right_btn=ttk.Button(tool_bar,image=align_right_icon)
 align_right_btn.grid(row=0,column=8,padx=5)
-
-
-####### speak button
-speak_btn=ttk.Button(tool_bar,image=speak_icon)
-speak_btn.grid(row=0,column=9, padx=5)
 
 #------------------------------&&&&&&&&&&-- end tool bar ----&&&&&&&&&&&-------------------------------#
 
@@ -470,19 +458,6 @@ count = 0
 for i in color_dict:
     color_theme.add_radiobutton(label = i, image=color_icons[count], variable=theme_choice, compound=tk.LEFT,command=change_theme)
     count += 1
-
-#//////////////// Speak Command.
-engine = pyttsx3.init('sapi5')
-voices = engine.getProperty('voices')
-engine.setProperty('voice', voices[1].id)
-
-def Speaktext():
-    audio=str(text_editor.get(1.0,tk.END))
-    engine.say(audio)
-    engine.runAndWait()
-
-speaked.add_command(label='Speak',compound=tk.LEFT,command=Speaktext,accelerator='CTRL+T')
-speak_btn.config(command=Speaktext)
 
 #---------------------------- end main menu back end --------------------#
 
