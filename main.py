@@ -1,11 +1,12 @@
 import tkinter as tk
 from tkinter import ttk
 from tkinter import font, colorchooser, filedialog, messagebox
-import os 
+import os
+import pyttsx3
 
 
 main_application=tk.Tk()
-main_application.geometry('1200x800')
+main_application.geometry('1200x750')
 main_application.title("Viyogi Long Notes")
 main_application.wm_iconbitmap('icon.ico')
 
@@ -61,11 +62,15 @@ color_dict = {
     'Night Blue' :('#ededed', '#6b9dc2')
 }
 
+######### Help menu ################
+help=tk.Menu(main_menu,tearoff=False)
+
 ############# cascading all menus##########
 main_menu.add_cascade(label='File', menu=files)
 main_menu.add_cascade(label='Edit', menu=edit)
 main_menu.add_cascade(label='View', menu=view)
 main_menu.add_cascade(label='Color', menu=color_theme)
+main_menu.add_cascade(label='Help', menu=help)
 
 
 #----------------------------&&&&&&&------ end main menu front end ------&&&&&----------------------#
@@ -85,45 +90,64 @@ font_box.grid(row=0,column=0,padx=5)
 
 #### size box---
 size_var=tk.IntVar()
-font_size=ttk.Combobox(tool_bar,textvariable=size_var)
+font_size=ttk.Combobox(tool_bar,textvariable=size_var,state ='readonly')
 font_size['values']=tuple(range(8,73,1))
 font_size.current(4)
 font_size.grid(row=0,column=1,padx=5)
 
+### Increase Font
+font_increase_icon=tk.PhotoImage(file="icons2/font_incre.PNG")
+font_increase_btn = ttk.Button(tool_bar,image=font_increase_icon)
+font_increase_btn.grid(row=0,column=2,padx=5)
+
+### Decrease Font
+font_decrease_icon=tk.PhotoImage(file="icons2/font_decre.PNG")
+font_decrease_btn = ttk.Button(tool_bar,image=font_decrease_icon)
+font_decrease_btn.grid(row=0,column=3,padx=5)
+
 #### bold button
 bold_icon=tk.PhotoImage(file="icons2/bold.png")
 bold_btn=ttk.Button(tool_bar,image=bold_icon)
-bold_btn.grid(row=0,column=2,padx=5)
+bold_btn.grid(row=0,column=4,padx=5)
 
 ### italic button
 italic_icon=tk.PhotoImage(file="icons2/italic.png")
 italic_btn=ttk.Button(tool_bar,image=italic_icon)
-italic_btn.grid(row=0,column=3,padx=5)
+italic_btn.grid(row=0,column=5,padx=5)
 
 ### underline button
 underline_icon=tk.PhotoImage(file="icons2/underline.png")
 underline_btn=ttk.Button(tool_bar,image=underline_icon)
-underline_btn.grid(row=0,column=4,padx=5)
+underline_btn.grid(row=0,column=6,padx=5)
 
 ### font color button
 font_color_icon=tk.PhotoImage(file="icons2/font_color.png")
 font_color_btn=ttk.Button(tool_bar,image=font_color_icon)
-font_color_btn.grid(row=0,column=5,padx=5)
+font_color_btn.grid(row=0,column=7,padx=5)
 
 ### align left
 align_left_icon=tk.PhotoImage(file="icons2/align_left.png")
 align_left_btn=ttk.Button(tool_bar,image=align_left_icon)
-align_left_btn.grid(row=0,column=6,padx=5)
+align_left_btn.grid(row=0,column=8,padx=5)
 
 ### align center
 align_center_icon=tk.PhotoImage(file="icons2/align_center.png")
 align_center_btn=ttk.Button(tool_bar,image=align_center_icon)
-align_center_btn.grid(row=0,column=7,padx=5)
+align_center_btn.grid(row=0,column=9,padx=5)
 
 ### align right
 align_right_icon=tk.PhotoImage(file="icons2/align_right.png")
 align_right_btn=ttk.Button(tool_bar,image=align_right_icon)
-align_right_btn.grid(row=0,column=8,padx=5)
+align_right_btn.grid(row=0,column=10,padx=5)
+
+
+### Speak now
+
+speak_icon=tk.PhotoImage(file="icons2/speaker.png")
+speak_btn=ttk.Button(tool_bar,image=speak_icon)
+speak_btn.grid(row=0,column=11,padx=5)
+
+
 
 #------------------------------&&&&&&&&&&-- end tool bar ----&&&&&&&&&&&-------------------------------#
 
@@ -139,6 +163,8 @@ scroll_bar.config(command=text_editor.yview)
 text_editor.config(yscrollcommand=scroll_bar.set)
 
 
+
+
 ###  basic font functionality ###
 curr_font_family='Arial'
 curr_font_size=24
@@ -151,7 +177,29 @@ def change_font_family(main_application):
 def change_font_size(main_application):
     global curr_font_size
     curr_font_size=size_var.get()
-    text_editor.configure(font=(curr_font_family,curr_font_size))
+    text_editor.configure(font=(curr_font_family,curr_font_size,))
+
+
+
+   ## increase Font 
+def font_inc():
+    global curr_font_size, font_size
+    curr_font_size = curr_font_size
+    if curr_font_size <=72:
+        curr_font_size = curr_font_size + 2
+    text_editor.configure(font=(curr_font_family,curr_font_size,))
+    font_size.current(curr_font_size)
+font_increase_btn.configure(command=font_inc)
+
+#   ## decrease Font
+def font_dec():
+    global curr_font_size, font_size
+    curr_font_size = curr_font_size
+    if curr_font_size >=8:
+        curr_font_size = curr_font_size - 2
+    text_editor.configure(font=(curr_font_family,curr_font_size,))
+    font_size.current(curr_font_size)
+font_decrease_btn.configure(command=font_dec)
 font_box.bind("<<ComboboxSelected>>", change_font_family)
 font_size.bind("<<ComboboxSelected>>", change_font_size)
 ## --------------- basic font functionality done -----------------###
@@ -221,6 +269,24 @@ def change_to_right():
     text_editor.insert(tk.INSERT,text_content,'right')
 align_right_btn.configure(command=change_to_right)
 
+#   $$$ SPEAK NOW
+engine = pyttsx3.init()
+voice = engine.getProperty('voices')
+engine.setProperty('voices', voice[0].id)
+def speak_now(audio=None):
+    if audio is None:
+        pass
+    else:
+        engine.say(audio)
+        engine.runAndWait()
+
+def incre_vol():
+    volume = engine.getProperty('volume')
+    engine.setProperty('volume', volume + 0.25)
+def decre_vol():
+    volume = engine.getProperty('volume')
+    engine.setProperty('volume', volume - 0.25)
+speak_now("Welcome To Viyogi Long Notes")
 text_editor.configure(font=('Arial',12))
 
 #---------------------------&&&&&&&&&&&&---------- end text edit space -----------&&&&&&&&&&&&--------------#
@@ -240,7 +306,7 @@ def changed(event=None):
     
     # this is for adding '*' in the name of file in application title
     #to show that the FILE IS UN-SAVED.
-    if text_editor.edit_modified() and file_url:
+    if text_editor.edit_modified() and file_url is None:
         main_application.title('*'+str(os.path.basename(file_url)))
     text_editor.edit_modified(False)
 
@@ -251,12 +317,14 @@ text_editor.bind('<<Modified>>', changed)
 
 #main menu variables
 file_url=""
+save_flag=0
 
 ########----------- New File Functionlity--------#######
 def new_file(event=None):
-    global file_url
+    global file_url,save_flag
     if file_url is not None:
         file_url=""
+        save_flag=0
     text_editor.delete(1.0,tk.END)
     main_application.title("Untitled file")
 
@@ -282,9 +350,17 @@ files.add_command(label="Open",compound=tk.LEFT, image=open_icon ,accelerator="C
 
 
 ### SAVE FILE FUNCTIONALITY _________________________
+# getname for new file saving
+def getname(event=None):
+    global file_url
+    if file_url:
+        main_application.title(os.path.basename(file_url))
+        return
+    else:
+        return
 
 def save_file(event=None):
-    global file_url
+    global file_url,save_flag,text_changed
     try:
         if file_url :
             content=str(text_editor.get(1.0,tk.END))
@@ -296,20 +372,23 @@ def save_file(event=None):
             file_url.write(content2)
             file_url.close()
         # this is remove '*' from the title name of file in application title
-        main_application.title(os.path.basename(file_url))  
+        save_flag=1
+        text_changed = False
+        return main_application.title(os.path.basename(file_url))  
     except:
-        return
+        return 
 
 files.add_command(label="Save",compound=tk.LEFT, image=save_icon ,accelerator="CTRL+S", command=save_file)
 
 # Save As Functionality---------------------
 def save_as_file(event=None):
-    global file_url
+    global file_url,text_changed
     try:
         content=text_editor.get(1.0,tk.END)
         file_url=filedialog.asksaveasfile(mode='w', defaultextension='.txt', filetypes=(('Text File','*.txt'),('Python File','*.py'),('All Files','*.*')))
         file_url.write(content)
         file_url.close()
+        text_changed = False
     except :
         return
 
@@ -360,7 +439,6 @@ def find_func(event=None):
     def findnow():
         word=find_entry.get()
         number_matches=0
-        data=str(text_editor.get(1.0,tk.END))
         text_editor.tag_remove('match', '1.0', tk.END)
         if word:
             start='1.0'
@@ -459,6 +537,14 @@ for i in color_dict:
     color_theme.add_radiobutton(label = i, image=color_icons[count], variable=theme_choice, compound=tk.LEFT,command=change_theme)
     count += 1
 
+#////////////////// adding command in help menu .////
+def about():
+    pass
+def helpme():
+    open("htttps://www.google.com/")
+
+help.add_command(label="About Us",compound=tk.LEFT, command=about)
+help.add_command(label="Help Me!",compound=tk.LEFT, command=helpme)
 #---------------------------- end main menu back end --------------------#
 
 ### window protocol event handelling
@@ -474,6 +560,7 @@ main_application.bind("<Control-s>", save_file)
 main_application.bind("<Control-Alt-s>", save_as_file)
 main_application.bind("<Control-q>", exit_func)
 main_application.bind("<Control-f>", find_func)
+
 ## for enabling binding keys when Capslock is on.
 main_application.bind("<Control-N>", new_file)
 main_application.bind("<Control-O>", open_file)
